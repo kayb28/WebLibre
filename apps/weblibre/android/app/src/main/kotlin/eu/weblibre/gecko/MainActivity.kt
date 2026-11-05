@@ -27,6 +27,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.ActionMode
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -61,6 +62,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
     private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
     private val ACTIVITY_CHANNEL = "eu.weblibre.gecko/activity"
     private val NAVIGATION_BAR_CHANNEL = "eu.weblibre.gecko/navigation_bar"
+    private val KEEP_ALIVE_CHANNEL = "eu.weblibre.gecko/keep_alive"
     private val ENGINE_ID = FlutterEngineCoordinator.ENGINE_ID
     private var trimMemoryChannel: MethodChannel? = null
     private var navigationBarChannel: MethodChannel? = null
@@ -330,6 +332,35 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
                     moveTaskToBack(true)
                     result.success(null)
                 }
+                else -> result.notImplemented()
+            }
+        }
+
+        // Keeps the process alive in the background while a keep-alive tab is
+        // open. Registered here like the activity channel, but deliberately
+        // stateless: it only touches the application context and the service,
+        // both of which outlive this activity, so the handler staying behind
+        // on a cached engine cannot act on a dead activity.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, KEEP_ALIVE_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "start" -> {
+                    ContextCompat.startForegroundService(
+                        applicationContext,
+                        Intent(applicationContext, KeepAliveService::class.java).apply {
+                            action = KeepAliveService.ACTION_START
+                        },
+                    )
+                    result.success(null)
+                }
+                "stop" -> {
+                    applicationContext.startService(
+                        Intent(applicationContext, KeepAliveService::class.java).apply {
+                            action = KeepAliveService.ACTION_STOP
+                        },
+                    )
+                    result.success(null)
+                }
+                "isActive" -> result.success(KeepAliveService.isRunning)
                 else -> result.notImplemented()
             }
         }

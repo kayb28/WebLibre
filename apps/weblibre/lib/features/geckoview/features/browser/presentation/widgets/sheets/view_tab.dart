@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/clear_site_data_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/desktop_mode_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/gesture_exclusion_section.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/keep_alive_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/routing_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
@@ -147,6 +148,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
             contextId: initialTabState.contextId,
           ),
           GestureExclusionSection(url: initialTabState.url),
+          KeepAliveSection(url: initialTabState.url),
           // Clear Site Data Section. The clear covers the site in every
           // partition, so from a private or isolated tab it would mostly hit
           // data outside that tab; closing the tab already drops its own data.

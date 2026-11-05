@@ -77,6 +77,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:weblibre/features/keep_alive/domain/services/keep_alive_service.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
@@ -484,6 +485,9 @@ class _MainWidget extends HookConsumerWidget {
         _activateService(ref, toolbarButtonConfigsProvider(location));
       }
       _activateService(ref, gestureSettingsRepositoryProvider);
+      // Keeps the Android foreground service running while a keep-alive
+      // tab is open, activated the same way: a read would take no listener.
+      _activateService(ref, keepAliveServiceActivatorProvider);
       final engineFreeFirstFrameState = Future.wait([
         for (final location in ToolbarConfigLocation.values)
           ref.read(toolbarButtonConfigsProvider(location).future),

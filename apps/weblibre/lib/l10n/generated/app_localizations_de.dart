@@ -3045,6 +3045,32 @@ class AppLocalizationsDe extends AppLocalizations {
     return 'Gesten konnten nicht umgeschaltet werden: $error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => 'Im Hintergrund aktiv halten';
+
+  @override
+  String get browser_keepAliveSubtitleOn =>
+      'Läuft weiter, solange diese Seite offen ist, und hält die Verbindung beim App-Wechsel aufrecht';
+
+  @override
+  String get browser_keepAliveSubtitleOff =>
+      'Die Seite kann beim App-Wechsel pausieren';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage =>
+      'Auf dieser Seite nicht verfügbar';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return 'Durch eine Regel für $host aktiviert';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return '„Im Hintergrund aktiv halten“ konnte nicht umgeschaltet werden: $error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return 'Fehler beim Laden der Berechtigungen: $error';

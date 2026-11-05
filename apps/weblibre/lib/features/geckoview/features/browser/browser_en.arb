@@ -594,6 +594,33 @@
     "placeholders": { "error": { "type": "String" } }
   },
 
+  "browser_keepAliveTitle": "Keep active in background",
+  "@browser_keepAliveTitle": {
+    "description": "Switch in the site info sheet: keep this site's session running while the user is in another app."
+  },
+  "browser_keepAliveSubtitleOn": "Stays running while this site is open, keeping its connection alive when you switch apps",
+  "@browser_keepAliveSubtitleOn": {
+    "description": "Line under that switch when keep-alive is on for this site."
+  },
+  "browser_keepAliveSubtitleOff": "The site may pause when you switch apps",
+  "@browser_keepAliveSubtitleOff": {
+    "description": "Line under that switch when keep-alive is off for this site."
+  },
+  "browser_keepAliveUnavailableOnThisPage": "Unavailable on this page",
+  "@browser_keepAliveUnavailableOnThisPage": {
+    "description": "Line under that switch on a page without a usable host (e.g. an error page)."
+  },
+  "browser_keepAliveEnabledByRuleFor": "Enabled by a rule for {host}",
+  "@browser_keepAliveEnabledByRuleFor": {
+    "description": "Line under that switch when a broader host rule already covers this page. host is a domain.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "browser_failedToToggleKeepAlive": "Failed to toggle keep-alive: {error}",
+  "@browser_failedToToggleKeepAlive": {
+    "description": "Error message when changing the keep-alive setting for this site failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
   "browser_errorLoadingPermissions": "Error loading permissions: {error}",
   "@browser_errorLoadingPermissions": {
     "description": "Error when the site's permissions could not be loaded. error is technical error text, usually English.",

@@ -3023,6 +3023,32 @@ class AppLocalizationsId extends AppLocalizations {
     return 'Gagal mengubah gestur: $error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => 'Tetap aktif di latar belakang';
+
+  @override
+  String get browser_keepAliveSubtitleOn =>
+      'Terus berjalan selama situs ini terbuka, menjaga koneksinya tetap hidup saat kamu berpindah aplikasi';
+
+  @override
+  String get browser_keepAliveSubtitleOff =>
+      'Situs ini bisa berhenti sejenak saat kamu berpindah aplikasi';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage =>
+      'Tidak tersedia di halaman ini';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return 'Diaktifkan oleh aturan untuk $host';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return 'Gagal mengubah tetap aktif: $error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return 'Galat saat memuat izin: $error';

@@ -2988,6 +2988,32 @@ class AppLocalizationsEn extends AppLocalizations {
     return 'Failed to toggle gestures: $error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => 'Keep active in background';
+
+  @override
+  String get browser_keepAliveSubtitleOn =>
+      'Stays running while this site is open, keeping its connection alive when you switch apps';
+
+  @override
+  String get browser_keepAliveSubtitleOff =>
+      'The site may pause when you switch apps';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage =>
+      'Unavailable on this page';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return 'Enabled by a rule for $host';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return 'Failed to toggle keep-alive: $error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return 'Error loading permissions: $error';

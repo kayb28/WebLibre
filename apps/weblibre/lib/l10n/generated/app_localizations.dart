@@ -5104,6 +5104,42 @@ abstract class AppLocalizations {
   /// **'Failed to toggle gestures: {error}'**
   String browser_failedToToggleGestures(String error);
 
+  /// Switch in the site info sheet: keep this site's session running while the user is in another app.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep active in background'**
+  String get browser_keepAliveTitle;
+
+  /// Line under that switch when keep-alive is on for this site.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays running while this site is open, keeping its connection alive when you switch apps'**
+  String get browser_keepAliveSubtitleOn;
+
+  /// Line under that switch when keep-alive is off for this site.
+  ///
+  /// In en, this message translates to:
+  /// **'The site may pause when you switch apps'**
+  String get browser_keepAliveSubtitleOff;
+
+  /// Line under that switch on a page without a usable host (e.g. an error page).
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable on this page'**
+  String get browser_keepAliveUnavailableOnThisPage;
+
+  /// Line under that switch when a broader host rule already covers this page. host is a domain.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled by a rule for {host}'**
+  String browser_keepAliveEnabledByRuleFor(String host);
+
+  /// Error message when changing the keep-alive setting for this site failed. error is technical error text, usually English.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to toggle keep-alive: {error}'**
+  String browser_failedToToggleKeepAlive(String error);
+
   /// Error when the site's permissions could not be loaded. error is technical error text, usually English.
   ///
   /// In en, this message translates to:

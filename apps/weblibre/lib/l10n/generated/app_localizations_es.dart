@@ -3068,6 +3068,32 @@ class AppLocalizationsEs extends AppLocalizations {
     return 'No se pudieron cambiar los gestos: $error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => 'Mantener activa en segundo plano';
+
+  @override
+  String get browser_keepAliveSubtitleOn =>
+      'Sigue en marcha mientras este sitio esté abierto, manteniendo su conexión viva al cambiar de aplicación';
+
+  @override
+  String get browser_keepAliveSubtitleOff =>
+      'El sitio puede pausarse al cambiar de aplicación';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage =>
+      'No disponible en esta página';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return 'Activada por una regla para $host';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return 'No se pudo cambiar el ajuste de mantener activa: $error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return 'Error al cargar los permisos: $error';

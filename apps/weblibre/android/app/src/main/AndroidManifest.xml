@@ -332,6 +332,15 @@
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
 
+        <!-- Keeps the app's process alive in the background while a tab the
+             user marked keep-alive (typically a streaming chat) is open, so
+             its session and connection survive an app switch. Driven by Dart
+             through the eu.weblibre.gecko/keep_alive channel in MainActivity. -->
+        <service
+            android:name=".KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="${enableImpeller}" />

@@ -2773,6 +2773,29 @@ class AppLocalizationsZh extends AppLocalizations {
     return '无法切换手势：$error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => '保持后台活跃';
+
+  @override
+  String get browser_keepAliveSubtitleOn => '在该网站打开期间持续运行，切换应用时保持其连接不中断';
+
+  @override
+  String get browser_keepAliveSubtitleOff => '切换应用时，该网站可能会暂停';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage => '在此页面上不可用';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return '已由 $host 的规则启用';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return '无法切换保持后台活跃：$error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return '加载权限时出错：$error';

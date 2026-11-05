@@ -3063,6 +3063,32 @@ class AppLocalizationsRu extends AppLocalizations {
     return 'Не удалось переключить жесты: $error';
   }
 
+
+  @override
+  String get browser_keepAliveTitle => 'Держать активным в фоне';
+
+  @override
+  String get browser_keepAliveSubtitleOn =>
+      'Продолжает работать, пока этот сайт открыт, сохраняя его соединение при переключении приложений';
+
+  @override
+  String get browser_keepAliveSubtitleOff =>
+      'Сайт может приостановиться при переключении приложений';
+
+  @override
+  String get browser_keepAliveUnavailableOnThisPage =>
+      'Недоступно на этой странице';
+
+  @override
+  String browser_keepAliveEnabledByRuleFor(String host) {
+    return 'Включено правилом для $host';
+  }
+
+  @override
+  String browser_failedToToggleKeepAlive(String error) {
+    return 'Не удалось переключить активность в фоне: $error';
+  }
+
   @override
   String browser_errorLoadingPermissions(String error) {
     return 'Ошибка загрузки разрешений: $error';
