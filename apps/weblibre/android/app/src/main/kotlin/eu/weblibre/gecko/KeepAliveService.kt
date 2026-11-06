@@ -121,9 +121,7 @@ class KeepAliveService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("WebLibre")
-            .setContentText(
-                "Keeping your marked sites active while you use other apps"
-            )
+            .setContentText(getString(R.string.keep_alive_notification_text))
             .setSmallIcon(R.drawable.ic_bg_service_small)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
@@ -135,11 +133,10 @@ class KeepAliveService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Background sessions",
+                getString(R.string.keep_alive_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description =
-                    "Shown while a marked site keeps its session running in the background"
+                description = getString(R.string.keep_alive_channel_description)
                 setShowBadge(false)
             }
 

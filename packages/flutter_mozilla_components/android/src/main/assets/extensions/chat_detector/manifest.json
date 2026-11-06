@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "WebLibre Chat Detector",
+  "version": "1.0.0",
+  "description": "Detects active chat generations by watching response streams, so the browser can keep the session alive while an answer is streaming.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chat-detector@weblibre.eu"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
+    "geckoViewAddons",
+    "webRequest",
+    "webRequestBlocking",
+    "tabs",
+    "nativeMessaging",
+    "nativeMessagingFromContent"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}

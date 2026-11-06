@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KeepAliveService: localized notification strings. -->
+<resources>
+    <string name="keep_alive_notification_text">Manteniendo tus sitios marcados activos mientras usas otras aplicaciones</string>
+    <string name="keep_alive_channel_name">Sesiones en segundo plano</string>
+    <string name="keep_alive_channel_description">Se muestra mientras un sitio marcado mantiene su sesión activa en segundo plano</string>
+</resources>

@@ -22,6 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/keep_alive/domain/repositories/keep_alive_settings.dart';
+import 'package:weblibre/features/keep_alive/domain/services/chat_session.dart';
 import 'package:weblibre/utils/host_rules.dart';
 
 /// Client of the Android foreground service that keeps the app's process —
@@ -66,7 +67,9 @@ class KeepAlivePlatformService {
 }
 
 /// Whether the foreground service should be running: true when at least one
-/// open tab is on a host the user marked keep-alive.
+/// open tab is on a host the user marked keep-alive, or when the chat
+/// detector sees an active generation on any tab (see `chat_session.dart`),
+/// so unmarked chat sites are also covered while they stream an answer.
 ///
 /// A closed tab's state lingers a few seconds for the undo toast (see
 /// `TabStates`), so the service can outlast its last tab by that much —
@@ -74,10 +77,18 @@ class KeepAlivePlatformService {
 final keepAliveShouldRunProvider = Provider<bool>((ref) {
   final hosts =
       ref.watch(keepAliveHostsProvider).value ?? const <String>[];
-  if (hosts.isEmpty) return false;
 
-  final tabStates = ref.watch(tabStatesProvider);
-  return tabStates.values.any((tab) => hostMatchesRule(tab.url, hosts));
+  if (hosts.isNotEmpty) {
+    final tabStates = ref.watch(tabStatesProvider);
+    if (tabStates.values.any((tab) => hostMatchesRule(tab.url, hosts))) {
+      return true;
+    }
+  }
+
+  final sessions = ref.watch(chatSessionsProvider);
+  return sessions.values.any(
+    (session) => isActiveGeneration(session),
+  );
 });
 
 /// Keeps the platform service in step with [keepAliveShouldRunProvider].

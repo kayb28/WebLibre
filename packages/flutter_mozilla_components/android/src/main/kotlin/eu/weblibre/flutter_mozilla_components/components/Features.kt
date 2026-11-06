@@ -6,6 +6,8 @@
 
 package eu.weblibre.flutter_mozilla_components.components
 
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.feature.ChatDetectorFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
@@ -31,6 +33,14 @@ class Features(
             engine,
             store,
             tabContentEvents
+        )
+    }
+
+    val chatDetectorFeature by lazy {
+        ChatDetectorFeature(
+            engine,
+            store,
+            GlobalComponents.chatDetectorEvents,
         )
     }
 }

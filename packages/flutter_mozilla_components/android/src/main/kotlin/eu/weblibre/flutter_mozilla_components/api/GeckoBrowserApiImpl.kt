@@ -18,6 +18,7 @@ import eu.weblibre.flutter_mozilla_components.EngineViewVisibility
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
+import eu.weblibre.flutter_mozilla_components.feature.ChatDetectorEvents
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
@@ -409,6 +410,11 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // Also set before GlobalComponents.setUp, which calls push.initialize() and can therefore
         // surface a registration failure before this sink would otherwise exist.
         GlobalComponents.pushEvents = GeckoPushEvents(_flutterPluginBinding.binaryMessenger)
+
+        // Set before GlobalComponents.setUp, whose WebExtensionActionsHost starts
+        // the chat detector feature against this sink.
+        GlobalComponents.chatDetectorEvents =
+            ChatDetectorEvents(_flutterPluginBinding.binaryMessenger)
 
         GlobalComponents.setUp(
             profileApplicationContext,

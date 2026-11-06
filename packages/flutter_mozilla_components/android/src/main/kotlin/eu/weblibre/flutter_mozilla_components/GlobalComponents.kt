@@ -39,6 +39,7 @@ import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationSe
 import eu.weblibre.flutter_mozilla_components.settings.BrowserSettingsPreferences
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
+import eu.weblibre.flutter_mozilla_components.feature.ChatDetectorEvents
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionActionsHost
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
@@ -326,6 +327,11 @@ object GlobalComponents {
     // only (no buffering/replay): null when Flutter is detached, in which case the
     // Flutter surface picks the prompt up on its next getPendingAppLinkPrompts query.
     var appLinkEvents: GeckoAppLinkEvents? = null
+
+    // Native -> Dart chat generation stream events (started/ended per tab),
+    // consumed by ChatDetectorFeature. Null on the headless/external path,
+    // where there is no Flutter surface to keep a session alive for.
+    var chatDetectorEvents: ChatDetectorEvents? = null
 
     @Volatile
     var gestureConfig: GestureConfig? = null

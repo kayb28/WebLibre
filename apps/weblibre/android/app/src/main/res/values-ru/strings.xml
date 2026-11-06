@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KeepAliveService: localized notification strings. -->
+<resources>
+    <string name="keep_alive_notification_text">Поддерживает отмеченные сайты активными, пока вы пользуетесь другими приложениями</string>
+    <string name="keep_alive_channel_name">Фоновые сеансы</string>
+    <string name="keep_alive_channel_description">Показывается, пока отмеченный сайт сохраняет свой сеанс в фоновом режиме</string>
+</resources>

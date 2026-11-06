@@ -32,6 +32,7 @@ object WebExtensionActionsHost {
     private var toolbarFeature: WebExtensionToolbarFeature? = null
     private var popupObserver: WebExtensionPopupObserver? = null
     private var actionTarget: WebExtensionActionTarget? = null
+    private var chatDetectorFeature: ChatDetectorFeature? = null
 
     /**
      * Called from `GlobalComponents.setUp` and `tearDown`, so the running
@@ -67,6 +68,12 @@ object WebExtensionActionsHost {
             store = components.core.store,
             createBlankSession = { components.core.engine.createSession() },
         ).also { it.start() }
+
+        // Chat generation detection outlives the fragments on purpose: it has
+        // no view and must keep running while the browser itself is in the
+        // background, which is exactly when a freezing process would lose a
+        // streaming answer.
+        chatDetectorFeature = components.features.chatDetectorFeature.also { it.start() }
     }
 
     /**
@@ -84,6 +91,8 @@ object WebExtensionActionsHost {
         popupObserver = null
         actionTarget?.stop()
         actionTarget = null
+        chatDetectorFeature?.stop()
+        chatDetectorFeature = null
     }
 
     private fun onMainThread(block: () -> Unit) {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KeepAliveService: localized notification strings. -->
+<resources>
+    <string name="keep_alive_notification_text">Menjaga situs yang Anda tandai tetap aktif saat Anda menggunakan aplikasi lain</string>
+    <string name="keep_alive_channel_name">Sesi latar belakang</string>
+    <string name="keep_alive_channel_description">Ditampilkan saat situs bertanda menjaga sesinya tetap berjalan di latar belakang</string>
+</resources>

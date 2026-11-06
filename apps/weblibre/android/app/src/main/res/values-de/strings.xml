@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KeepAliveService: localized notification strings. -->
+<resources>
+    <string name="keep_alive_notification_text">Hält deine markierten Websites aktiv, während du andere Apps verwendest</string>
+    <string name="keep_alive_channel_name">Hintergrund-Sitzungen</string>
+    <string name="keep_alive_channel_description">Wird angezeigt, während eine markierte Website ihre Sitzung im Hintergrund aufrechterhält</string>
+</resources>

@@ -77,6 +77,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:weblibre/features/keep_alive/domain/services/chat_detector.dart';
 import 'package:weblibre/features/keep_alive/domain/services/keep_alive_service.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
@@ -488,6 +489,9 @@ class _MainWidget extends HookConsumerWidget {
       // Keeps the Android foreground service running while a keep-alive
       // tab is open, activated the same way: a read would take no listener.
       _activateService(ref, keepAliveServiceActivatorProvider);
+      // Feeds the chat generation sessions from the detector's network
+      // events; the keep-alive condition above reads those sessions.
+      _activateService(ref, chatDetectorActivatorProvider);
       final engineFreeFirstFrameState = Future.wait([
         for (final location in ToolbarConfigLocation.values)
           ref.read(toolbarButtonConfigsProvider(location).future),

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- KeepAliveService: shown while a keep-alive marked site keeps the
+         browser process alive in the background. -->
+    <string name="keep_alive_notification_text">Keeping your marked sites active while you use other apps</string>
+    <string name="keep_alive_channel_name">Background sessions</string>
+    <string name="keep_alive_channel_description">Shown while a marked site keeps its session running in the background</string>
+</resources>

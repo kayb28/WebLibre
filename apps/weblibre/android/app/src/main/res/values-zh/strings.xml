@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KeepAliveService: localized notification strings. -->
+<resources>
+    <string name="keep_alive_notification_text">在你使用其他应用时保持已标记网站的活跃状态</string>
+    <string name="keep_alive_channel_name">后台会话</string>
+    <string name="keep_alive_channel_description">当已标记的网站在后台保持其会话运行时显示</string>
+</resources>
