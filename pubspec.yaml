@@ -145,10 +145,10 @@ melos:
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor alpha --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor alpha --target-platform ${WEBLIBRE_TARGET_PLATFORMS:-android-arm,android-arm64,android-x64} --split-per-abi --no-tree-shake-icons
     build-browser-alpha-impeller:
       description: Build alpha comparison APKs split per ABI with Impeller enabled
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor alphaImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor alphaImpeller --target-platform ${WEBLIBRE_TARGET_PLATFORMS:-android-arm,android-arm64,android-x64} --split-per-abi --no-tree-shake-icons

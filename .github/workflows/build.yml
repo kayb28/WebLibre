@@ -4,7 +4,15 @@ on:
   push:
     tags:
       - "v*"
+    branches:
+      - "feature/chat-generation-detection"
   workflow_dispatch:
+    inputs:
+      build_impeller:
+        description: 'Also build the Impeller comparison APK (slower)'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build:
@@ -79,13 +87,20 @@ jobs:
       - name: Determine build type
         id: build-type
         run: |
-          # workflow_dispatch (build manual) siempre toma la vía prerelease (solo APK)
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.ref_name }}" =~ (pre|alpha) ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "Build type: Prerelease (APK only)"
+          # Only a stable tag is a full release. Prerelease tags (pre|alpha),
+          # manual dispatches and pushes to the feature branch are test
+          # builds: APK only, arm64 only, no Play Console upload.
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+            if [[ "${{ github.ref_name }}" =~ (pre|alpha) ]]; then
+              echo "is_prerelease=true" >> $GITHUB_OUTPUT
+              echo "Build type: Prerelease tag (arm64 APK only)"
+            else
+              echo "is_prerelease=false" >> $GITHUB_OUTPUT
+              echo "Build type: Full release (APK + Bundle + Play Console)"
+            fi
           else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-            echo "Build type: Full release (APK + Bundle + Play Console)"
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "Build type: Test build (arm64 APK only)"
           fi
 
       - uses: ruby/setup-ruby@v1
@@ -164,14 +179,24 @@ jobs:
         env:
           SING_BOX_SOURCE: ${{ runner.temp }}/sing-box
           IPTPROXY_SOURCE: ${{ runner.temp }}/IPtProxy
-        run: melos run build-go-runtime --no-select
+        run: |
+          if [[ "${{ steps.build-type.outputs.is_prerelease }}" == "true" ]]; then
+            # Test builds only ship to the phone's ABI: skip the other three.
+            native/go_mobile_runtime/scripts/build-android.sh --target android/arm64
+          else
+            melos run build-go-runtime --no-select
+          fi
 
       - name: Build APK (Alpha)
         if: steps.build-type.outputs.is_prerelease == 'true'
+        env:
+          WEBLIBRE_TARGET_PLATFORMS: android-arm64
         run: melos run build-browser-alpha --no-select
 
       - name: Build APK (Alpha, Impeller)
-        if: steps.build-type.outputs.is_prerelease == 'true'
+        if: steps.build-type.outputs.is_prerelease == 'true' && (startsWith(github.ref, 'refs/tags/') || inputs.build_impeller == true)
+        env:
+          WEBLIBRE_TARGET_PLATFORMS: android-arm64
         run: melos run build-browser-alpha-impeller --no-select
 
       - name: Build APK (Stable)
