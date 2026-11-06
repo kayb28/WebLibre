@@ -408,18 +408,31 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
      *
      * The flags are taken just before the reset, so they are whatever was last
      * asked for, by this activity or by Dart's overlay style.
+     *
+     * After the system-UI fix, re-dispatches the window insets on every resume.
+     * When the app was paused with the IME visible, the system dismissed the
+     * keyboard and the window already resized before this activity got
+     * `onResume`, so Flutter's `MediaQuery.viewInsets` and GeckoView's
+     * platform view both hold the last viewport they saw. An input field that
+     * was scrolled into view above the keyboard then stays hidden below the
+     * fold until the next configuration change — which is exactly why rotating
+     * the device brings it back: rotation triggers an inset re-dispatch.
+     * `requestApplyInsets()` is that re-dispatch, run proactively on every
+     * resume instead of waiting for one. #660
      */
     @Suppress("DEPRECATION")
     override fun onPostResume() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             super.onPostResume()
-            return
+        } else {
+            val decor = window.decorView
+            val visibility = decor.systemUiVisibility
+            super.onPostResume()
+            decor.systemUiVisibility = visibility
         }
 
-        val decor = window.decorView
-        val visibility = decor.systemUiVisibility
-        super.onPostResume()
-        decor.systemUiVisibility = visibility
+        // Proactive inset re-dispatch — see method kdoc.
+        window.decorView.requestApplyInsets()
     }
 
     /**
