@@ -1232,6 +1232,16 @@
                     "description": "Safe Browsing also classifies frames, scripts and other subresources, so a malicious embed on a safe page is caught"
                 }
             }
+        },
+        "Content Processes": {
+            "description": "Engine content process pool sizing no setting exposes",
+            "preferences": {
+                "dom.ipc.processCount": {
+                    "value": 8,
+                    "title": "Match desktop Firefox's shared content process pool",
+                    "description": "GeckoView leaves this pool to device-dependent defaults, which can be as low as two processes. With a small pool, a tab needing a new process recycles the least recently used one, unloading that tab's page. Eight matches desktop Firefox"
+                }
+            }
         }
     }
 }
