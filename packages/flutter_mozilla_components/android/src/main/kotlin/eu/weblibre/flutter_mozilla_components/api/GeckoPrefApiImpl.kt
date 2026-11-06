@@ -92,6 +92,20 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
                     onError = onError
                 )
 
+                // A whole Dart `int` arrives through the standard message codec
+                // as an `Int` when it fits 32 bits and as a `Long` when it does
+                // not; both are the same pref kind on the Gecko side. Rejecting
+                // the 32-bit half made every numeric baseline preference —
+                // `dom.ipc.processCount` among them — throw before reaching the
+                // engine, taking the whole `applyDefaultPrefs` call down with it.
+                is Int -> components.core.engine.setBrowserPref(
+                    name,
+                    value,
+                    branch,
+                    onSuccess = onSuccess,
+                    onError = onError
+                )
+
                 is Long -> components.core.engine.setBrowserPref(
                     name,
                     value.toInt(),
