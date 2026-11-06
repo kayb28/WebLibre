@@ -176,6 +176,22 @@ class KeyboardVisibilityFeature(
     ): WindowInsetsCompat {
         isKeyboardShowingUp = insets.isVisible(ime())
 
+        // An IME animation torn down without its onEnd — the app paused while
+        // the keyboard was mid-animation (leaving to recents/home), or a
+        // teardown skipped the animation callbacks — leaves the deferred
+        // latch set with nothing that will ever clear it. While it holds, every
+        // later IME inset is swallowed: the keyboard reopens, nobody is told,
+        // and the focused input stays behind it until the view is recreated —
+        // which is why rotating the device used to fix it.
+        //
+        // No animation is in flight here: onProgress runs only while one is,
+        // and onEnd clears both before this can run after it. A set latch with
+        // no animation running is therefore stale by definition — drop it and
+        // let this dispatch report.
+        if (areKeyboardInsetsDeferred && !keyboardAnimationInProgress) {
+            areKeyboardInsetsDeferred = false
+        }
+
         if (!areKeyboardInsetsDeferred) {
             val height = calculateKeyboardHeight(
                 insets.getInsets(ime()).bottom,
@@ -248,6 +264,15 @@ class KeyboardVisibilityFeature(
      */
     fun checkKeyboardState() {
         rootView?.let { view ->
+            // Also the recovery point for the animation latches: a re-check
+            // driven by a resume arrives after a pause that may have torn an
+            // IME animation down without its onEnd, so the deferred flag can
+            // still be set from it (see onApplyWindowInsets). Clearing both
+            // here makes every resume self-healing even if no further inset
+            // ever arrives for onApplyWindowInsets to handle.
+            areKeyboardInsetsDeferred = false
+            keyboardAnimationInProgress = false
+
             val insets = ViewCompat.getRootWindowInsets(view) ?: return
 
             val imeVisible = insets.isVisible(ime())

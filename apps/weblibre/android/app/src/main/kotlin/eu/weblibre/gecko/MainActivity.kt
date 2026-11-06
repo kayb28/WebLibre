@@ -436,6 +436,25 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
     }
 
     /**
+     * The second re-dispatch point for #660. The IME re-shows for a
+     * still-focused editor exactly when the window regains focus — returning
+     * to the app with Gboard's last target still alive — and that change races
+     * the resume sequence's own inset dispatch: whatever the keyboard state
+     * settles into, it happens around this callback, not around
+     * [onPostResume]. Re-dispatch here too, so every insets listener —
+     * Flutter's viewport metrics, [KeyboardVisibilityFeature], GeckoView's own
+     * keyboard handling — re-reads the post-focus state instead of a stale
+     * one.
+     */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        if (hasFocus) {
+            window.decorView.requestApplyInsets()
+        }
+    }
+
+    /**
      * GeckoView's selection toolbar is an action mode started on this window
      * (`BasicSelectionActionDelegate` → `Activity.startActionMode`). Reporting
      * it is what lets the touch pipeline tell a selection-handle drag apart

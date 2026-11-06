@@ -872,6 +872,13 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         // session the process should keep prioritised when it goes to background.
         AppLifecycleFeature.setVisibleSession(this, sessionId)
         keyboardVisibilityFeature?.checkKeyboardState()
+        // The direct check above can still read the stale root insets of the
+        // pause that just ended. MainActivity re-dispatches the window insets
+        // at the end of the activity's resume (and again when the window
+        // regains focus), and this posted pass runs after those, so a second
+        // re-read sees the keyboard state the re-dispatch produced. Harmless
+        // when nothing changed: Dart dedupes equal heights.
+        view?.post { keyboardVisibilityFeature?.checkKeyboardState() }
     }
 
     /** Ends a text selection: its floating toolbar is a window above the page. */
