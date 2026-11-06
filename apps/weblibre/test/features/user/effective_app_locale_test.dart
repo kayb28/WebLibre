@@ -38,9 +38,9 @@ void main() {
       return container.read(effectiveAppLocaleProvider);
     }
 
-    test('an unset language falls back to English, not the system', () {
-      expect(defaultAppLocale, 'en');
-      expect(resolve(null), const Locale('en'));
+    test('an unset language follows the system locale', () {
+      expect(defaultAppLocale, appLocaleSystem);
+      expect(resolve(null), isNull);
     });
 
     test(
