@@ -35,12 +35,22 @@ enum ChatGenerationPhase { generating, stabilizing, completed }
 class ChatSession {
   final Uri url;
   final ChatGenerationPhase phase;
+
+  /// When the stream currently (or last) feeding this session opened.
+  /// Informational only — a reconnecting stream refreshes it.
   final DateTime since;
+
+  /// When this chain of streams began. Unlike [since] it is not refreshed
+  /// by a stream that re-opens while the session is still alive, so a loop
+  /// of auto-reconnecting streams cannot keep the keep-alive condition
+  /// satisfied forever (see [isActiveGeneration]).
+  final DateTime chainSince;
 
   const ChatSession({
     required this.url,
     required this.phase,
     required this.since,
+    required this.chainSince,
   });
 
   ChatSession copyWith({ChatGenerationPhase? phase, DateTime? since}) =>
@@ -48,14 +58,16 @@ class ChatSession {
         url: url,
         phase: phase ?? this.phase,
         since: since ?? this.since,
+        chainSince: chainSince,
       );
 }
 
-/// How long a stream may stay open without being trusted as an active
-/// generation: chat answers stream for seconds or minutes, but some sites
-/// also hold long-lived notification streams that never close. The keep-alive
-/// condition ignores anything older, so such a stream cannot pin the
-/// foreground service open forever.
+/// How long a generation chain may stay trusted as an active generation:
+/// chat answers stream for seconds or minutes, but a stream that only
+/// re-opens in a loop would otherwise pin the foreground service open for as
+/// long as its tab lives. The keep-alive condition ignores anything older,
+/// and a new chain only starts after a session was completed — never
+/// mid-loop — so such streams cannot keep the service hostage.
 const maxTrustedGeneration = Duration(minutes: 10);
 
 /// Quiet period after the last stream closes before a generation counts as
@@ -113,12 +125,25 @@ class ChatSessionManager extends Notifier<Map<String, ChatSession>> {
   void streamStarted(String tabId, Uri url) {
     _openStreams[tabId] = (_openStreams[tabId] ?? 0) + 1;
     _cancelTimers(tabId);
+
+    // A stream that arrives while the session is still generating or
+    // stabilizing is a continuation of the same generation chain — a
+    // reconnect, not a new generation — so it inherits the chain's age
+    // instead of resetting the trust window. Only a stream after a
+    // completed (or absent) session starts a fresh chain.
+    final existing = state[tabId];
+    final chainSince =
+        existing == null || existing.phase == ChatGenerationPhase.completed
+        ? DateTime.now()
+        : existing.chainSince;
+
     _set(
       tabId,
       ChatSession(
         url: url,
         phase: ChatGenerationPhase.generating,
         since: DateTime.now(),
+        chainSince: chainSince,
       ),
     );
   }
@@ -185,11 +210,12 @@ class ChatSessionManager extends Notifier<Map<String, ChatSession>> {
 }
 
 /// Whether this session still counts as an active generation for the
-/// keep-alive decision: generating or stabilizing, and trusted by age
-/// (see [maxTrustedGeneration]).
+/// keep-alive decision: generating or stabilizing, and trusted by chain age
+/// (see [maxTrustedGeneration]) — the age of the whole chain, not just of
+/// its latest stream, so a reconnecting stream cannot refresh the window.
 bool isActiveGeneration(ChatSession session) {
   if (session.phase == ChatGenerationPhase.completed) {
     return false;
   }
-  return DateTime.now().difference(session.since) < maxTrustedGeneration;
+  return DateTime.now().difference(session.chainSince) < maxTrustedGeneration;
 }

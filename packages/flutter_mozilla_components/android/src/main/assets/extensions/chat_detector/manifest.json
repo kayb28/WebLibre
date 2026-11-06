@@ -12,7 +12,6 @@
     "<all_urls>",
     "geckoViewAddons",
     "webRequest",
-    "webRequestBlocking",
     "tabs",
     "nativeMessaging",
     "nativeMessagingFromContent"
