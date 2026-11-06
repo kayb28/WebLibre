@@ -31,14 +31,14 @@ class ChatDetectorEvents(messenger: BinaryMessenger) {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile
-    private var sink: EventChannel.Event? = null
+    private var sink: EventChannel.EventSink? = null
 
     private val snapshot = ConcurrentHashMap<String, HashMap<String, Any>>()
 
     init {
         EventChannel(messenger, CHANNEL).setStreamHandler(
             object : EventChannel.StreamHandler {
-                override fun onListen(arguments: Any?, events: EventChannel.Event?) {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                     sink = events
                     // Replay the snapshot: events are idempotent on the Dart
                     // side (a repeated "started" just refreshes the session).
@@ -57,7 +57,9 @@ class ChatDetectorEvents(messenger: BinaryMessenger) {
      * finished (type "ended") on the tab with the given app tab id.
      */
     fun onStreamUpdate(tabId: String, url: String, type: String) {
-        val event = hashMapOf(
+        // Explicit value type: without it hashMapOf infers the common
+        // supertype of String and Long and stops matching the snapshot map.
+        val event = hashMapOf<String, Any>(
             "tabId" to tabId,
             "url" to url,
             "type" to type,
