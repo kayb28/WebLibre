@@ -51,10 +51,11 @@ const appLocaleSystem = 'system';
 
 /// App UI language for users who have not picked one.
 ///
-/// English for now, while the translations are new: the user opts into their
-/// language (or [appLocaleSystem]) in settings. Setting this to
-/// [appLocaleSystem] makes the system locale the default instead.
-const defaultAppLocale = 'en';
+/// Follow the system locale by default: the shipped translations are
+/// complete, and Flutter's locale resolution falls back to English for
+/// device languages without one. The user can still pin a specific language
+/// (or [appLocaleSystem]) in settings.
+const defaultAppLocale = appLocaleSystem;
 
 const defaultUiScaleFactor = 1.0;
 const minUiScaleFactor = 0.5;
