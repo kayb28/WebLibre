@@ -170,10 +170,6 @@ jobs:
         if: steps.build-type.outputs.is_prerelease == 'true'
         run: melos run build-browser-alpha --no-select
 
-      - name: Build APK (Alpha, Impeller)
-        if: steps.build-type.outputs.is_prerelease == 'true'
-        run: melos run build-browser-alpha-impeller --no-select
-
       - name: Build APK (Stable)
         if: steps.build-type.outputs.is_prerelease == 'false'
         run: melos run build-browser --no-select
@@ -192,16 +188,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: weblibre-alpha-apks
-          path: |
-            apps/weblibre/build/app/outputs/apk/alpha/release/*.apk
-            apps/weblibre/build/app/outputs/apk/alphaImpeller/release/*.apk
+          path: apps/weblibre/build/app/outputs/apk/alpha/release/*.apk
           if-no-files-found: error
 
       - name: Create github artifact release (Prerelease)
         if: steps.build-type.outputs.is_prerelease == 'true' && startsWith(github.ref, 'refs/tags/')
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk,apps/weblibre/build/app/outputs/apk/alphaImpeller/release/*.apk"
+          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk"
           prerelease: true
 
       - name: Create github artifact release (Full)
