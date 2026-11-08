@@ -11317,6 +11317,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Eine zusätzliche untere Symbolleiste für Navigation und Aktionen anzeigen';
 
   @override
+  String get settings_autoHideContextualToolbarTitle =>
+      'Kontextleiste automatisch ausblenden';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords =>
+      'Kontextleiste, Symbolleiste, Scrollen';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle =>
+      'Kontextleiste beim Scrollen ausblenden';
+
+  @override
   String get settings_customizeToolbarButtons =>
       'Schaltflächen der Symbolleiste anpassen';
 

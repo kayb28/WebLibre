@@ -11269,6 +11269,18 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan bilah alat bawah tambahan untuk navigasi dan tindakan';
 
   @override
+  String get settings_autoHideContextualToolbarTitle =>
+      'Sembunyikan Bilah Alat Kontekstual Otomatis';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords =>
+      'kontekstual, tombol, gulir';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle =>
+      'Sembunyikan bilah alat kontekstual saat menggulir';
+
+  @override
   String get settings_customizeToolbarButtons => 'Sesuaikan Tombol Bilah Alat';
 
   @override

@@ -10314,6 +10314,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_showContextualToolbarSubtitle => '显示用于导航和操作的额外底部工具栏';
 
   @override
+  String get settings_autoHideContextualToolbarTitle => '自动隐藏上下文工具栏';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords => '上下文, 工具栏, 滚动';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle => '滚动时隐藏上下文工具栏';
+
+  @override
   String get settings_customizeToolbarButtons => '自定义工具栏按钮';
 
   @override

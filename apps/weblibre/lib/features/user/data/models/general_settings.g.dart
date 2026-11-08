@@ -117,6 +117,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
 
+  GeneralSettings autoHideContextualBar(bool autoHideContextualBar);
+
   GeneralSettings tabBarPosition(TabBarPositionSetting tabBarPosition);
 
   GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
@@ -314,6 +316,7 @@ abstract class _$GeneralSettingsCWProxy {
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
+    bool autoHideContextualBar,
     TabBarPositionSetting tabBarPosition,
     TabBarLayout tabBarLayout,
     TabBarStackingMode tabBarStackingMode,
@@ -576,6 +579,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar) =>
       call(tabBarShowContextualBar: tabBarShowContextualBar);
+
+  @override
+  GeneralSettings autoHideContextualBar(bool autoHideContextualBar) =>
+      call(autoHideContextualBar: autoHideContextualBar);
 
   @override
   GeneralSettings tabBarPosition(TabBarPositionSetting tabBarPosition) =>
@@ -881,6 +888,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
+    Object? autoHideContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? tabBarLayout = const $CopyWithPlaceholder(),
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
@@ -1204,6 +1212,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarShowContextualBar
           // ignore: cast_nullable_to_non_nullable
           : tabBarShowContextualBar as bool,
+      autoHideContextualBar:
+          autoHideContextualBar == const $CopyWithPlaceholder() ||
+              autoHideContextualBar == null
+          ? _value.autoHideContextualBar
+          // ignore: cast_nullable_to_non_nullable
+          : autoHideContextualBar as bool,
       tabBarPosition:
           tabBarPosition == const $CopyWithPlaceholder() ||
               tabBarPosition == null
@@ -1647,6 +1661,7 @@ GeneralSettings _$GeneralSettingsFromJson(
         ),
   tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
+  autoHideContextualBar: json['autoHideContextualBar'] as bool?,
   tabBarPosition: $enumDecodeNullable(
     _$TabBarPositionSettingEnumMap,
     json['tabBarPosition'],
@@ -1819,6 +1834,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
+  'autoHideContextualBar': instance.autoHideContextualBar,
   'tabBarPosition': _$TabBarPositionSettingEnumMap[instance.tabBarPosition]!,
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'tabBarStackingMode':

@@ -11412,6 +11412,18 @@ class AppLocalizationsRu extends AppLocalizations {
       'Показывать дополнительную нижнюю панель для навигации и действий';
 
   @override
+  String get settings_autoHideContextualToolbarTitle =>
+      'Автоскрытие контекстной панели';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords =>
+      'контекстная панель, кнопки, прокрутка';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle =>
+      'Скрывать контекстную панель при прокрутке';
+
+  @override
   String get settings_customizeToolbarButtons => 'Настроить кнопки панели';
 
   @override

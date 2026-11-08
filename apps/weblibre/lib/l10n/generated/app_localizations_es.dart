@@ -11407,6 +11407,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mostrar una barra de herramientas inferior adicional para navegación y acciones';
 
   @override
+  String get settings_autoHideContextualToolbarTitle =>
+      'Ocultar la barra de herramientas contextual automáticamente';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords =>
+      'contextual, botones, desplazamiento, scroll';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle =>
+      'Ocultar la barra de herramientas contextual al desplazarse';
+
+  @override
   String get settings_customizeToolbarButtons =>
       'Personalizar los botones de la barra de herramientas';
 

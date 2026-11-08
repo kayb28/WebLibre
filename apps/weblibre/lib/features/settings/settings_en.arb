@@ -4045,6 +4045,18 @@
   "@settings_showContextualToolbarSubtitle": {
     "description": "Explanation under that switch."
   },
+  "settings_autoHideContextualToolbarTitle": "Auto Hide Contextual Toolbar",
+  "@settings_autoHideContextualToolbarTitle": {
+    "description": "Switch: hide the contextual toolbar row while scrolling a page, independently of the tab bar's own auto hide."
+  },
+  "settings_autoHideContextualToolbarKeywords": "contextual, buttons, scroll",
+  "@settings_autoHideContextualToolbarKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_autoHideContextualToolbarSubtitle": "Hide the contextual toolbar while scrolling",
+  "@settings_autoHideContextualToolbarSubtitle": {
+    "description": "Explanation under that switch."
+  },
   "settings_customizeToolbarButtons": "Customize Toolbar Buttons",
   "@settings_customizeToolbarButtons": {
     "description": "Row that opens the editor for the buttons of the contextual toolbar."

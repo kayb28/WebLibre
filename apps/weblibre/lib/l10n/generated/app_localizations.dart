@@ -18696,6 +18696,24 @@ abstract class AppLocalizations {
   /// **'Show additional bottom toolbar for navigation and actions'**
   String get settings_showContextualToolbarSubtitle;
 
+  /// Switch: hide the contextual toolbar row while scrolling a page, independently of the tab bar's own auto hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Hide Contextual Toolbar'**
+  String get settings_autoHideContextualToolbarTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'contextual, buttons, scroll'**
+  String get settings_autoHideContextualToolbarKeywords;
+
+  /// Explanation under that switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the contextual toolbar while scrolling'**
+  String get settings_autoHideContextualToolbarSubtitle;
+
   /// Row that opens the editor for the buttons of the contextual toolbar.
   ///
   /// In en, this message translates to:

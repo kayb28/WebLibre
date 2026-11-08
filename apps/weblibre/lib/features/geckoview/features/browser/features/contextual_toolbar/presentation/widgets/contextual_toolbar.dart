@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 
 /// Wraps one toolbar button; see [ContextualToolbar.wrapButton].
 typedef ToolbarButtonWrapper = Widget Function(String buttonId, Widget button);
@@ -79,6 +80,11 @@ class ContextualToolbar extends HookConsumerWidget {
   /// Forwarded to [ContextualToolbarView.trailing].
   final List<Widget> trailing;
 
+  /// How long the row takes to retract on scroll and come back, matching the
+  /// bar's own slide (`_AnimatedToolbar` in the browser screen) so the two
+  /// never animate at different speeds.
+  static const _retractDuration = Duration(milliseconds: 250);
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final previewTab = isPreview ? this.previewTab : null;
@@ -87,6 +93,14 @@ class ContextualToolbar extends HookConsumerWidget {
     final liveTabId = previewTab == null ? selectedTabId : null;
     final liveTabState = ref.watch(tabStateProvider(liveTabId));
     final liveHistoryState = ref.watch(tabHistoryStateProvider(liveTabId));
+    // The row retracts on page scroll (`autoHideContextualBar`), on its own
+    // wherever the bar itself is not hiding. When the whole bar hides the row
+    // rides along with its slide, so only this state needs handling here — and
+    // a preview never retracts.
+    final contextuallyHidden =
+        liveTabId != null &&
+        ref.watch(toolbarVisibilityControllerProvider(liveTabId)) ==
+            ToolbarVisibility.contextualOnlyHidden;
     final tabState = previewTab?.tabState ?? liveTabState;
     final historyState = previewTab?.historyState ?? liveHistoryState;
     final configs = ref.watch(
@@ -120,7 +134,7 @@ class ContextualToolbar extends HookConsumerWidget {
       [configs],
     );
 
-    final buttons = showConfiguredButtons
+    final buttons = showConfiguredButtons && !contextuallyHidden
         ? resolvedButtons.map((button) {
             final built = buildResolvedToolbarButton(
               scope,
@@ -133,11 +147,22 @@ class ContextualToolbar extends HookConsumerWidget {
           }).toList()
         : <Widget>[];
 
-    return ContextualToolbarView(
-      buttons: buttons,
-      axis: axis,
-      wrap: wrap,
-      trailing: trailing,
+    // The slot's size animates so the retraction hands the height back to the
+    // bar smoothly — the horizontal bar grows its page, the rail's flexible
+    // sections take the space. A wide panel keeps its trailing main actions
+    // (they stay in the wrap below), where the other layouts simply shrink to
+    // nothing.
+    return AnimatedSize(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : _retractDuration,
+      curve: Curves.easeInOutQuart,
+      child: ContextualToolbarView(
+        buttons: buttons,
+        axis: axis,
+        wrap: wrap,
+        trailing: trailing,
+      ),
     );
   }
 }

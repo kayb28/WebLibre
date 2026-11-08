@@ -11107,6 +11107,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show additional bottom toolbar for navigation and actions';
 
   @override
+  String get settings_autoHideContextualToolbarTitle =>
+      'Auto Hide Contextual Toolbar';
+
+  @override
+  String get settings_autoHideContextualToolbarKeywords =>
+      'contextual, buttons, scroll';
+
+  @override
+  String get settings_autoHideContextualToolbarSubtitle =>
+      'Hide the contextual toolbar while scrolling';
+
+  @override
   String get settings_customizeToolbarButtons => 'Customize Toolbar Buttons';
 
   @override

@@ -147,6 +147,12 @@ List<SettingsEntryDefinition> _contextualToolbarEntries(
     child: const _ShowContextualTabBarTile(),
   ),
   SettingsEntryDefinition(
+    title: l10n.settings_autoHideContextualToolbarTitle,
+    subtitle: l10n.settings_autoHideContextualToolbarSubtitle,
+    keywords: settingsKeywords(l10n.settings_autoHideContextualToolbarKeywords),
+    child: const _AutoHideContextualToolbarTile(),
+  ),
+  SettingsEntryDefinition(
     title: l10n.settings_customizeToolbarButtons,
     subtitle: l10n.settings_indexCustomizeToolbarButtonsSubtitle,
     keywords: settingsKeywords(l10n.settings_customizeToolbarButtonsKeywords),
@@ -426,6 +432,43 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
                   currentSettings.copyWith.tabBarShowContextualBar(value),
             );
       },
+    );
+  }
+}
+
+/// Auto-hide of the contextual row on its own: the row retracts on page
+/// scroll even where the bar it sits in never hides (a side rail, or the
+/// bar's own auto hide off).
+class _AutoHideContextualToolbarTile extends HookConsumerWidget {
+  const _AutoHideContextualToolbarTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final autoHideContextualBar = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoHideContextualBar),
+    );
+    final contextualBarShown = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.tabBarShowContextualBar),
+    );
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_autoHideContextualToolbarTitle),
+      subtitle: Text(l10n.settings_autoHideContextualToolbarSubtitle),
+      secondary: const Icon(MdiIcons.folderHidden),
+      value: autoHideContextualBar,
+      // Greyed out while there is no row to hide, like the button editor row.
+      onChanged: contextualBarShown
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings
+                        .copyWith
+                        .autoHideContextualBar(value),
+                  );
+            }
+          : null,
     );
   }
 }
