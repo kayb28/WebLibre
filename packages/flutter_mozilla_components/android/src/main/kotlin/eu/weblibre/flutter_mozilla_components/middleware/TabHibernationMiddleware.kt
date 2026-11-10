@@ -64,7 +64,7 @@ object TabHibernationMiddleware : Middleware<BrowserState, BrowserAction> {
             is TabListAction.RemoveTabsAction,
             is TabListAction.RemoveAllTabsAction,
             is TabListAction.RemoveAllNormalTabsAction,
-            is TabListAction.RemoveAllPrivateTabsAction -> prune(store),
+            is TabListAction.RemoveAllPrivateTabsAction -> prune(store)
             else -> Unit
         }
     }
