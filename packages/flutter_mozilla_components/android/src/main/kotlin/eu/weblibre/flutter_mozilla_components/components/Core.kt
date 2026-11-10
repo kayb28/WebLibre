@@ -36,6 +36,7 @@ import eu.weblibre.flutter_mozilla_components.middleware.RecentlyClosedFilterMid
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.TabHibernationMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.TabUploadsMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -306,6 +307,10 @@ class Core(
                 // Android Components deliberately parks a crashed tab until the
                 // app asks for it back; nothing else here ever would.
                 CrashRecoveryMiddleware(),
+                // The wake side of tab hibernation: engine sessions Dart asks
+                // the hibernation channel to suspend (idle background tabs) are
+                // recreated when the tab is selected again. See its KDoc.
+                TabHibernationMiddleware,
                 flutterEventMiddleware,
                 DownloadMiddleware(
                     applicationContext = context,

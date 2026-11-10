@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/translation.d
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_hibernation.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
@@ -395,6 +396,11 @@ class TabStates extends _$TabStates {
 
   @override
   Map<String, TabState> build() {
+    // Create the hibernation manager once, so its idle-tab sweep runs from
+    // startup: nothing watches its state until the tab views open. Read,
+    // not watch - a toggle of the setting must not rebuild tab states.
+    ref.read(tabHibernationProvider.notifier);
+
     final eventService = ref.watch(eventServiceProvider);
 
     final subscriptions = [

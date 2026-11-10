@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
+import eu.weblibre.flutter_mozilla_components.api.TabHibernationApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
@@ -29,6 +30,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   private val browserApi = GeckoBrowserApiImpl()
   private var pointerRouter: PointerInputRouter? = null
+  private val tabHibernationApi = TabHibernationApiImpl()
 
   /**
    * Held so the leases this engine took — profile access, and whatever the
@@ -103,6 +105,9 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     browserApi.attachBinding(flutterPluginBinding, router)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
     SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
+    // The hibernation channel needs no initialized components: its handler
+    // resolves them per call, and answers nothing until the engine exists.
+    tabHibernationApi.register(flutterPluginBinding.binaryMessenger)
 
     // Register the engine-settings API at attach time (before GeckoBrowserService
     // .initialize) so Dart can push the history-exclusion snapshot to native
@@ -123,6 +128,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     PointerInputHostApi.setUp(binding.binaryMessenger, null)
     pointerRouter?.dispose()
     pointerRouter = null
+    tabHibernationApi.unregister()
     GeckoProfileApi.setUp(binding.binaryMessenger, null)
     // Before anything else: the profile-access lease and the arbiter's selection
     // and maintenance leases are all process-global and keyed on the isolate, so
