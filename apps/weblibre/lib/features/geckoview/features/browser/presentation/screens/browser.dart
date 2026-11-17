@@ -96,6 +96,49 @@ import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+/// One pointer move over the page, fed into [tracker] and translated into a
+/// hide or show request on the shared per-tab toolbar visibility.
+///
+/// [barAutoHide] is whether the bar whose scroll this is hides as a whole — a
+/// horizontal tab bar whose `autoHideTabBar` is on. [contextualAutoHide] is
+/// whether the contextual toolbar row follows the scroll on its own; the row
+/// may live in another bar than this one (a top bar's row sits in the bottom
+/// bar), so the callers pass the layout's knowledge rather than their own
+/// bar's spec alone.
+void _feedAutoHideScroll(
+  WidgetRef ref,
+  AutoHideScrollTracker tracker,
+  Offset event, {
+  required bool barAutoHide,
+  required bool contextualAutoHide,
+}) {
+  if (!barAutoHide && !contextualAutoHide) return;
+
+  final settings = ref.read(generalSettingsWithDefaultsProvider);
+  switch (tracker.add(
+    event.dy,
+    hideDistance: settings.autoHideTabBarDistance,
+  )) {
+    case AutoHideAction.hide:
+      ref
+          .read(
+            toolbarVisibilityControllerProvider(
+              ref.read(selectedTabProvider),
+            ).notifier,
+          )
+          .requestHide(hideTabBarItself: barAutoHide);
+    case AutoHideAction.show:
+      ref
+          .read(
+            toolbarVisibilityControllerProvider(
+              ref.read(selectedTabProvider),
+            ).notifier,
+          )
+          .show();
+    case AutoHideAction.none:
+  }
+}
+
 class _AnimatedToolbar extends HookWidget {
   final bool visible;
   final TabBarPosition position;
@@ -202,7 +245,10 @@ class _TabBar extends HookConsumerWidget {
     }
 
     useOnAppLifecycleStateChange((previous, current) {
-      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
+      final settings = ref.read(generalSettingsWithDefaultsProvider);
+      if (!settings.autoHideTabBar && !settings.autoHideContextualBar) {
+        return;
+      }
       if (current == AppLifecycleState.resumed) {
         showToolbar();
         tracker.reset();
@@ -213,24 +259,26 @@ class _TabBar extends HookConsumerWidget {
       pointerMoveEvents,
       onData: (event) {
         final settings = ref.read(generalSettingsWithDefaultsProvider);
-        if (!settings.autoHideTabBar) return;
+        // The bar itself only ever hides from the horizontal bars; a rail
+        // stands down on a swipe (and its overlay) alone.
+        final barAutoHide =
+            settings.autoHideTabBar && tabBarPosition.isHorizontal;
+        // The contextual row follows the scroll wherever it is drawn: in
+        // this bar, in the bottom one, or in the rail. The duplicated-buttons
+        // flag is how a bar without the row (the top one) still knows a
+        // contextual row exists somewhere.
+        final contextualAutoHide =
+            settings.autoHideContextualBar &&
+            (bar.showContextualToolbar ||
+                bar.hideMainToolbarButtonsDuplicatedInContextualToolbar);
 
-        switch (tracker.add(
-          event.dy,
-          hideDistance: settings.autoHideTabBarDistance,
-        )) {
-          case AutoHideAction.hide:
-            ref
-                .read(
-                  toolbarVisibilityControllerProvider(
-                    ref.read(selectedTabProvider),
-                  ).notifier,
-                )
-                .requestHide();
-          case AutoHideAction.show:
-            showToolbar();
-          case AutoHideAction.none:
-        }
+        _feedAutoHideScroll(
+          ref,
+          tracker,
+          event,
+          barAutoHide: barAutoHide,
+          contextualAutoHide: contextualAutoHide,
+        );
       },
     );
 
@@ -451,6 +499,12 @@ class _BrowserContentPositioned extends ConsumerWidget {
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final bool autoHideTabBar;
+
+  /// Whether the contextual toolbar row follows the page scroll, wherever it
+  /// is drawn — the page's pointer moves then have to keep flowing even when
+  /// the bar itself never hides ([autoHideTabBar] off, or a side rail).
+  final bool contextualAutoHide;
+
   final bool isRail;
   final bool isSmallWebActive;
   final double sideRailTotalWidth;
@@ -472,6 +526,7 @@ class _BrowserContentPositioned extends ConsumerWidget {
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.autoHideTabBar,
+    required this.contextualAutoHide,
     required this.isRail,
     required this.isSmallWebActive,
     required this.sideRailTotalWidth,
@@ -548,7 +603,7 @@ class _BrowserContentPositioned extends ConsumerWidget {
       child: _Browser(
         overlayController: overlayController,
         tabInFullScreen: tabInFullScreen,
-        pointerMoveEventSink: autoHideTabBar
+        pointerMoveEventSink: autoHideTabBar || contextualAutoHide
             ? pointerMoveEventsController.sink
             : null,
         hasTopBarOffset: topOffset > 0,
@@ -654,6 +709,10 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final double railWidth;
   final String? selectedTabId;
 
+  /// The page's pointer moves, so the rail's contextual row can follow the
+  /// scroll like the horizontal bars' rows do. Null when nothing tracks it.
+  final Stream<Offset>? pointerMoveEvents;
+
   /// Whether the rail shows its resize handle.
   final bool resizable;
 
@@ -665,6 +724,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
     required this.tabBarPosition,
     required this.bar,
     required this.railWidth,
+    required this.pointerMoveEvents,
     required this.resizable,
     required this.overlay,
     required this.selectedTabId,
@@ -672,10 +732,14 @@ class _SideRailToolbarLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rail = BrowserSideRail(
+    final rail = _RailContextualAutoHide(
       bar: bar,
-      railWidth: railWidth,
-      resizable: resizable,
+      pointerMoveEvents: pointerMoveEvents,
+      child: BrowserSideRail(
+        bar: bar,
+        railWidth: railWidth,
+        resizable: resizable,
+      ),
     );
 
     if (overlay) {
@@ -693,6 +757,74 @@ class _SideRailToolbarLayer extends StatelessWidget {
       tabInFullScreen: tabInFullScreen,
       child: rail,
     );
+  }
+}
+
+/// Feeds the page's pointer moves into the shared auto-hide machinery for the
+/// side rail, which is not a [_TabBar] and so carries no tracker of its own.
+///
+/// Only the contextual row follows the scroll on a rail; the rail itself
+/// stands down on a swipe (and, overlaying, on the cursor) alone, so every
+/// request here leaves the bar standing.
+class _RailContextualAutoHide extends HookConsumerWidget {
+  final BrowserBarSpec bar;
+
+  /// The page's pointer moves; null disables the tracking.
+  final Stream<Offset>? pointerMoveEvents;
+  final Widget child;
+
+  const _RailContextualAutoHide({
+    required this.bar,
+    required this.pointerMoveEvents,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabId = ref.watch(selectedTabProvider);
+    final tracker = useMemoized(AutoHideScrollTracker.new);
+
+    useEffect(() {
+      tracker.reset();
+      return null;
+    }, [tabId]);
+
+    ref.listen(toolbarVisibilityControllerProvider(tabId), (previous, next) {
+      if (next == ToolbarVisibility.visible && previous != next) {
+        tracker.reset();
+      }
+    });
+
+    useOnAppLifecycleStateChange((previous, current) {
+      final settings = ref.read(generalSettingsWithDefaultsProvider);
+      if (!settings.autoHideContextualBar || !bar.showContextualToolbar) {
+        return;
+      }
+      if (current == AppLifecycleState.resumed) {
+        ref
+            .read(toolbarVisibilityControllerProvider(tabId).notifier)
+            .show();
+        tracker.reset();
+      }
+    });
+
+    useOnStreamChange(
+      pointerMoveEvents,
+      onData: (event) {
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
+        _feedAutoHideScroll(
+          ref,
+          tracker,
+          event,
+          // The rail never hides on scroll; only its contextual row does.
+          barAutoHide: false,
+          contextualAutoHide:
+              settings.autoHideContextualBar && bar.showContextualToolbar,
+        );
+      },
+    );
+
+    return child;
   }
 }
 
@@ -1578,6 +1710,19 @@ class BrowserScreen extends HookConsumerWidget {
     final railOverlay = layout.railOverlay;
     final autoHideTabBar = layout.autoHide;
 
+    // Whether the contextual row follows the page scroll: it may hide where
+    // the bar itself does not (a rail, or the bar's own auto hide off), so the
+    // page's pointer moves must keep flowing for it alone. Small web's bars
+    // never hide, row included.
+    final contextualScrollTracking =
+        !isSmallWebActive &&
+        contextualToolbarEnabled &&
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (value) => value.autoHideContextualBar,
+          ),
+        );
+
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
         overlayController.show();
@@ -1664,12 +1809,30 @@ class BrowserScreen extends HookConsumerWidget {
 
     final bottomSafeArea = MediaQuery.paddingOf(context).bottom;
 
+    // The contextual row standing down on scroll takes its height back, from
+    // the page and from everything that clears the bar (FAB, find bar,
+    // prompts, snackbars). The change lands instantly — the platform view is
+    // never animated, the same trade the keyboard inset makes — while the row
+    // itself retracts through its own animated slot. Watching here rebuilds
+    // the screen at the hide/show threshold only; the scroll itself stays in
+    // the scoped widgets.
+    final contextualBarHidden =
+        ref.watch(toolbarVisibilityControllerProvider(selectedTabId)) ==
+        ToolbarVisibility.contextualOnlyHidden;
+    final contextualRowShrink =
+        contextualBarHidden &&
+            (layout.bottomBar?.showContextualToolbar ?? false)
+        ? BrowserTabBar.contextualToolabarHeight
+        : 0.0;
+
     // The bottom bar's size, for the page inset and the FAB. A sheet covers
     // the bars and never changes their size, so the page's viewport stays put
     // while one opens: resizing the Gecko viewport would cost a page reflow
     // plus, under hybrid composition, a native surface recreation, all in the
     // same frame as the sheet's slide-in.
-    final bottomAppBarContentSize = Size.fromHeight(layout.bottomBarHeight);
+    final bottomAppBarContentSize = Size.fromHeight(
+      layout.bottomBarHeight - contextualRowShrink,
+    );
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
@@ -1917,6 +2080,7 @@ class BrowserScreen extends HookConsumerWidget {
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 autoHideTabBar: autoHideTabBar,
+                contextualAutoHide: contextualScrollTracking,
                 isRail: isRail,
                 isSmallWebActive: isSmallWebActive,
                 sideRailTotalWidth: sideRailTotalWidth,
@@ -1996,6 +2160,9 @@ class BrowserScreen extends HookConsumerWidget {
                     tabBarPosition: tabBarPosition,
                     bar: layout.rail!,
                     railWidth: layout.railWidth,
+                    pointerMoveEvents: contextualScrollTracking
+                        ? pointerMoveEventsController.stream
+                        : null,
                     resizable: layout.railResizable,
                     overlay: railOverlay,
                     selectedTabId: selectedTabId,

@@ -518,6 +518,16 @@ class GeneralSettings with FastEquatable {
   final bool tabViewBottomSheet;
   final bool tabBarShowContextualBar;
 
+  /// Whether the contextual toolbar row follows the page scroll: it retracts
+  /// once the page is scrolled on, and comes back with the first scroll the
+  /// other way — the same distance [autoHideTabBar] uses, but independently of
+  /// it, so the row also stands down where the tab bar itself never hides (a
+  /// side rail) or was told not to ([autoHideTabBar] off).
+  ///
+  /// The row rides along with the bar when the whole bar hides, so this only
+  /// adds behaviour; it never changes the bar's own hide.
+  final bool autoHideContextualBar;
+
   /// Where the user asked for the tab bar. Resolve with
   /// [effectiveTabBarPosition] before using it for layout.
   ///
@@ -766,6 +776,7 @@ class GeneralSettings with FastEquatable {
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
     required this.tabBarShowContextualBar,
+    required this.autoHideContextualBar,
     required this.tabBarPosition,
     required this.tabBarLayout,
     required this.tabBarStackingMode,
@@ -871,6 +882,7 @@ class GeneralSettings with FastEquatable {
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
     bool? tabBarShowContextualBar,
+    bool? autoHideContextualBar,
     TabBarPositionSetting? tabBarPosition,
     TabBarLayout? tabBarLayout,
     TabBarStackingMode? tabBarStackingMode,
@@ -992,6 +1004,7 @@ class GeneralSettings with FastEquatable {
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabViewBottomSheet = tabViewBottomSheet ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
+       autoHideContextualBar = autoHideContextualBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPositionSetting.auto,
        tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
        tabBarStackingMode = tabBarStackingMode ?? TabBarStackingMode.accordion,
@@ -1545,6 +1558,7 @@ class GeneralSettings with FastEquatable {
     historyAutoCleanInterval,
     tabViewBottomSheet,
     tabBarShowContextualBar,
+    autoHideContextualBar,
     tabBarPosition,
     tabBarLayout,
     tabBarStackingMode,

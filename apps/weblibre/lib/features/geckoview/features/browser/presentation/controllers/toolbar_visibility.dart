@@ -25,7 +25,19 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 part 'toolbar_visibility.g.dart';
 
-enum ToolbarVisibility { visible, hidden, dismissed }
+enum ToolbarVisibility {
+  visible,
+  hidden,
+
+  /// Only the contextual toolbar row is hidden, by scroll; the rest of the
+  /// bar — tab strip, address bar — stays. Entered when the row's own auto
+  /// hide (`autoHideContextualBar`) fires where the bar itself does not hide:
+  /// its own auto hide is off, or the bar is a side rail, which never does.
+  /// When the whole bar hides ([hidden]) the row rides along with it, so this
+  /// state is never used for that.
+  contextualOnlyHidden,
+  dismissed,
+}
 
 @Riverpod(keepAlive: true)
 class ToolbarVisibilityController extends _$ToolbarVisibilityController {
@@ -36,7 +48,8 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
       previous,
       next,
     ) {
-      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
+      final settings = ref.read(generalSettingsWithDefaultsProvider);
+      if (!settings.autoHideTabBar && !settings.autoHideContextualBar) {
         return;
       }
       if (next == true) {
@@ -69,11 +82,16 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
   }
 
   /// Hide toolbar via scroll. All guards checked internally.
-  void requestHide() {
+  ///
+  /// [hideTabBarItself] is whether the bar that fed the scroll tracker hides
+  /// as a whole (a horizontal tab bar whose own auto hide is on); otherwise
+  /// only the contextual toolbar row stands down, wherever it is drawn.
+  void requestHide({bool hideTabBarItself = true}) {
     if (state != ToolbarVisibility.visible) return;
 
     final settings = ref.read(generalSettingsWithDefaultsProvider);
-    if (!settings.autoHideTabBar) return;
+    if (hideTabBarItself && !settings.autoHideTabBar) return;
+    if (!hideTabBarItself && !settings.autoHideContextualBar) return;
 
     final isLoading = ref.read(tabStatesProvider)[tabId]?.isLoading ?? false;
     if (isLoading) return;
@@ -81,13 +99,18 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
     final viewportService = ref.read(viewportServiceProvider);
     if (!viewportService.isBrowserHandlingScrollEnabled) return;
 
-    state = ToolbarVisibility.hidden;
+    state = hideTabBarItself
+        ? ToolbarVisibility.hidden
+        : ToolbarVisibility.contextualOnlyHidden;
   }
 
   /// Show toolbar (scroll-up, tab change, loading start, etc).
   /// Won't show if manually dismissed — use forceShow() for that.
   void show() {
-    if (state != ToolbarVisibility.hidden) return;
+    if (state != ToolbarVisibility.hidden &&
+        state != ToolbarVisibility.contextualOnlyHidden) {
+      return;
+    }
     state = ToolbarVisibility.visible;
   }
 

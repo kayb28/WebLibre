@@ -48,6 +48,10 @@ enum PersistedBoolKey {
     cacheTime: StorageCacheTime(Duration(days: 30)),
   ),
   tabSuggestions(key: 'TabSuggestions', defaultValue: false),
+  // Whether background tabs idle past the hibernation threshold get their
+  // engine sessions suspended (see tab_hibernation.dart). On by default:
+  // the feature exists to reclaim the per-tab content-process RAM.
+  tabHibernation(key: 'TabHibernation', defaultValue: true),
   supporterBannerDismissed(
     key: 'SupporterBannerDismissed',
     defaultValue: false,

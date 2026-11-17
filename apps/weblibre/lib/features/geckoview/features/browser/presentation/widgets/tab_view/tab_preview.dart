@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_hibernation.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
@@ -193,6 +194,12 @@ class GridTabPreview extends HookConsumerWidget {
       tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
     );
 
+    // True only while native holds the tab's engine session suspended; the
+    // badge disappears the moment the tab is selected again.
+    final isHibernated = ref.watch(
+      tabHibernationProvider.select((ids) => ids.contains(tabId)),
+    );
+
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
       IsolatedTabMode() => appColors.isolatedTabForeground,
@@ -294,6 +301,27 @@ class GridTabPreview extends HookConsumerWidget {
                         bottom: 6.0,
                         left: 6.0,
                         child: TabDepthIndicator(depth: depth),
+                      ),
+                    if (isHibernated)
+                      Positioned(
+                        bottom: 6.0,
+                        right: 6.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest.withAlpha(
+                              200,
+                            ),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.bedtime_outlined,
+                            size: 16.0,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                       ),
                     if (trailingChild != null ||
                         isPinned ||
@@ -501,6 +529,11 @@ class ListTabPreview extends HookConsumerWidget {
       tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
     );
 
+    // True only while native holds the tab's engine session suspended.
+    final isHibernated = ref.watch(
+      tabHibernationProvider.select((ids) => ids.contains(tabId)),
+    );
+
     final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
       (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
@@ -594,6 +627,14 @@ class ListTabPreview extends HookConsumerWidget {
                               Icon(
                                 MdiIcons.pin,
                                 color: colorScheme.primary,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            if (isHibernated) ...[
+                              Icon(
+                                Icons.bedtime_outlined,
+                                color: colorScheme.onSurfaceVariant,
                                 size: 14,
                               ),
                               const SizedBox(width: 4),
