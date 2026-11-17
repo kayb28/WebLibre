@@ -542,7 +542,7 @@
                 "network.connectivity-service.enabled": {
                     "value": false,
                     "title": "Disable network connectivity probes",
-                    "description": "Firefox periodically checks connectivity by resolving example.org, cloudflare-dns.com and ipv4only.arpa through the system resolver, with DNS-over-HTTPS explicitly disabled, and by fetching detectportal.firefox.com. Those DNS lookups are made by the resolver rather than by a network channel, so container routing cannot send them through a proxy — they leak past Tor and every proxy connection regardless of how routing is configured.",
+                    "description": "Firefox periodically checks connectivity by resolving example.org, cloudflare-dns.com and ipv4only.arpa through the system resolver, with DNS-over-HTTPS explicitly disabled, and by fetching detectportal.firefox.com. Those DNS lookups are made by the resolver rather than by a network channel, so container routing cannot send them through a proxy \u2014 they leak past Tor and every proxy connection regardless of how routing is configured.",
                     "enforceOnStartup": true,
                     "locked": true
                 },
@@ -1195,6 +1195,16 @@
                     "value": 5,
                     "title": "Block media autoplay by default",
                     "description": "Blocks both audio and video autoplay"
+                }
+            }
+        },
+        "Performance": {
+            "description": "Load-time and rendering performance trade-offs",
+            "preferences": {
+                "dom.image-lazy-loading.enabled": {
+                    "value": true,
+                    "title": "Lazy-load off-screen images",
+                    "description": "Images outside the viewport load as you scroll to them instead of all at page load. Speeds up opening large pages; some sites mis-measure their own placeholders."
                 }
             }
         }

@@ -32,8 +32,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/generating_indicator.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/keep_alive/domain/services/chat_session.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -200,6 +202,14 @@ class GridTabPreview extends HookConsumerWidget {
       tabHibernationProvider.select((ids) => ids.contains(tabId)),
     );
 
+    // The chat detector's session state for this tab, if any: a pulsing dot
+    // while the answer streams and a dimmed one while it stabilizes.
+    final chatPhase = ref.watch(
+      chatSessionsProvider.select(
+        (sessions) => sessions[tabId]?.phase,
+      ),
+    );
+
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
       IsolatedTabMode() => appColors.isolatedTabForeground,
@@ -320,6 +330,27 @@ class GridTabPreview extends HookConsumerWidget {
                             Icons.bedtime_outlined,
                             size: 16.0,
                             color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    if (chatPhase == ChatGenerationPhase.generating ||
+                        chatPhase == ChatGenerationPhase.stabilizing)
+                      Positioned(
+                        top: 6.0,
+                        right: 6.0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest.withAlpha(
+                              200,
+                            ),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(8.0),
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(2.0),
+                          child: GeneratingIndicator(
+                            stabilizing:
+                                chatPhase == ChatGenerationPhase.stabilizing,
                           ),
                         ),
                       ),
@@ -534,6 +565,11 @@ class ListTabPreview extends HookConsumerWidget {
       tabHibernationProvider.select((ids) => ids.contains(tabId)),
     );
 
+    // The chat detector's session state for this tab, if any (list rows).
+    final chatPhase = ref.watch(
+      chatSessionsProvider.select((sessions) => sessions[tabId]?.phase),
+    );
+
     final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
       (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
@@ -636,6 +672,14 @@ class ListTabPreview extends HookConsumerWidget {
                                 Icons.bedtime_outlined,
                                 color: colorScheme.onSurfaceVariant,
                                 size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            if (chatPhase != null &&
+                                chatPhase != ChatGenerationPhase.completed) ...[
+                              GeneratingIndicator(
+                                stabilizing:
+                                    chatPhase == ChatGenerationPhase.stabilizing,
                               ),
                               const SizedBox(width: 4),
                             ],

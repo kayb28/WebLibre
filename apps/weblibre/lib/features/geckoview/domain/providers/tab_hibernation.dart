@@ -26,6 +26,7 @@ import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/keep_alive/domain/services/chat_session.dart';
 
 /// How long a background tab must go without the user looking at it before
 /// its engine session is suspended: at that point native closes the session
@@ -169,6 +170,13 @@ class TabHibernation extends Notifier<Set<String>> {
         if (tabId == selected) continue;
         if (state.contains(tabId)) continue;
 
+        // A tab streaming a chat answer must never be suspended: killing its
+        // engine session would kill the stream the keep-alive service runs
+        // to protect. Content events only refresh the idle clock while they
+        // arrive, and a generation can outlast the idle threshold while its
+        // page sits quiet waiting for the answer.
+        final session = ref.read(chatSessionsProvider)[tabId];
+        if (session != null && isActiveGeneration(session)) continue;
         final lastActive = _lastActive[tabId];
         if (lastActive == null) {
           _lastActive[tabId] = now;
