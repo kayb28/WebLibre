@@ -37,7 +37,7 @@ part 'preference_settings.g.dart';
 
 const _preferenceMigrationVersionKey = 'preferenceMigrationVersion';
 const _preferenceMigrationPartitionKey = 'preferenceMigration';
-const _preferenceMigrationSchemaVersion = 4;
+const _preferenceMigrationSchemaVersion = 5;
 const _mainProcessDisableJitPref =
     'javascript.options.main_process_disable_jit';
 
@@ -120,6 +120,16 @@ class StartupPreferenceEnforcementService
       3: () => _prefManager.resetPrefs([
         ..._retiredGecko159Prefs,
         ..._restoredGeckoDefaults,
+      ]),
+      // The multi-tab capacity flip: applying a preference writes it to the
+      // user branch, so profiles that ever applied the Process Isolation
+      // switch keep that strategy (and the per-origin process multiplier it
+      // shipped with) forever. Resetting hands both back to Gecko's default
+      // branch, where the Content Processes baseline now pins the strategy
+      // to 0; the switch can re-apply its value over it any time.
+      4: () => _prefManager.resetPrefs([
+        'fission.webContentIsolationStrategy',
+        'dom.ipc.processCount.webIsolated',
       ]),
     },
   );
