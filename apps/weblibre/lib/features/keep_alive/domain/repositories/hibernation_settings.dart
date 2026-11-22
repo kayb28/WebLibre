@@ -30,7 +30,7 @@ const _thresholdKey = 'hibernationThresholdMinutes';
 /// matches the 30-minute spirit of desktop "memory savers": long enough
 /// that background loads, redirects and slow reading are over for nearly
 /// every page, short enough that a stack of tabs holds RAM for minutes,
- * not days.
+/// not days.
 const defaultHibernationThresholdMinutes = 30;
 
 /// The thresholds the settings segmented button offers. A short one frees
