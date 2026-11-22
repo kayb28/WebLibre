@@ -12,6 +12,7 @@ Fork de [FaFre/WebLibre](https://github.com/FaFre/WebLibre) con un objetivo: **u
 | v0.50.0-alpha-fork.4 | **483** | Publicada. Fix de versionCode (423 < 473 de la alpha-6 instalada — Android rechazaba el update) (`62d818e1`) |
 | v0.50.0-alpha-fork.5 | **493** | Publicada. **Primera release con todo el trabajo de IA**: merge `main` → `feature/chat-generation-detection` (`aeafcd58`) |
 | v0.50.0-alpha-fork.6 | **503** | Publicada. Mejoras UI/rendimiento + fix de integración hibernación ↔ generación (ver abajo) |
+| v0.50.0-alpha-fork.7 | **513** | Pool de procesos compartido entre sitios — fix de que la 3ª pestaña no se dibujaba — + hibernación con umbral configurable (10/30/60 min, ver abajo) |
 
 ## El trabajo de IA (feature/chat-generation-detection)
 
@@ -30,8 +31,16 @@ Fork de [FaFre/WebLibre](https://github.com/FaFre/WebLibre) con un objetivo: **u
 - **Sección Performance en settings.json**: `dom.image-lazy-loading.enabled` = true (lazy-load de imágenes fuera del viewport). Verificada contra Firefox (documentada desde Firefox 75). `network.prefetch-next` e HTTP/3 ya existían en el archivo y NO se duplicaron.
 - **Registro**: este archivo FORK.md + notas de release en cada prerelease del repo.
 
+## Fix de capacidad multi-pestaña (fork.7)
+
+- **Por qué solo vivían dos páginas**: con `fission.webContentIsolationStrategy` = 1 (el default de GeckoView) cada sitio distinto ocupa su **propio proceso de contenido**. En un dispositivo con la RAM ajustada, el proceso de la 3ª pestaña es donde se acaba la memoria: la pestaña abre, incluso carga, pero la superficie nunca dibuja. El pool de 8 (`dom.ipc.processCount`) solo lo reparten las páginas si están en él.
+- **El fix**: `fission.webContentIsolationStrategy` = 0 en el baseline del engine (sección *Content Processes* de `settings.json`, rama default en cada arranque). Todas las páginas comparten los 8 procesos del pool y caben muchas más pestañas vivas a la vez. El switch *Isolate every site in its own process* (grupo *Process Isolation*) sigue ahí para quien quiera el aislamiento por sitio de vuelta; con el baseline en 0, encenderlo reaplica el 1.
+- **Migración (paso 4, schema 5)**: resetea `fission.webContentIsolationStrategy` y `dom.ipc.processCount.webIsolated` de la rama user de los perfiles existentes (aplicar el switch los grabó ahí y sobrevivirían para siempre); el baseline nuevo gobierna, el switch puede reaplicar.
+- **Hibernación con umbral configurable (10/30/60 min)**: el barrido lee el umbral de la base de datos en cada pasada — un cambio aplica en el tick siguiente (<1 min). Ajuste nuevo en *Browsing > Tabs*: switch de hibernación (el bool `TabHibernation` persistido, que hasta ahora nada en la UI escribía) + botón segmentado 10/30/60 con el icono de luna de las pestañas hibernadas. Textos junto al tile en los 6 idiomas del fork: el template l10n fusionado y los archivos generados no se regeneran en remoto — plegar las 6 claves en `settings_en.arb` (+ traducciones) con un `melos run build-l10n` local cuando toque.
+- **Cómo probar**: abrir 4+ pestañas de sitios distintos y verificar que todas dibujan; en `about:config` la estrategia debe leer 0 (rama default); ajustar el umbral de hibernación y ver el cambio en <1 min. Si una pestaña aún no dibuja, logcat buscando kills de procesos de contenido (LMK de HyperOS) — ese es el presupuesto de RAM del dispositivo, no un bug del navegador.
+
 ## Convenios del fork
 
-- versionCode estrictamente creciente: …423 (fork.1-3, error) → 483 (fork.4) → 493 (fork.5) → 503 (fork.6).
+- versionCode estrictamente creciente: …423 (fork.1-3, error) → 483 (fork.4) → 493 (fork.5) → 503 (fork.6) → 513 (fork.7).
 - Notas de release en español en cada prerelease (el upstream no las llena).
 - El árbol de feature se mantiene siempre por delante de main; main absorbe por merge, nunca se descarta trabajo.
