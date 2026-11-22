@@ -26,16 +26,8 @@ import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/keep_alive/domain/repositories/hibernation_settings.dart';
 import 'package:weblibre/features/keep_alive/domain/services/chat_session.dart';
-
-/// How long a background tab must go without the user looking at it before
-/// its engine session is suspended: at that point native closes the session
-/// (with it the tab's sandboxed content process) and keeps the serialized
-/// state. In the spirit of the 30-minute defaults of desktop "memory
-/// savers": long enough that background loads, redirects and slow reading
-/// are over for nearly every page, short enough that a stack of tabs holds
-/// RAM for minutes, not days.
-const _hibernationAfter = Duration(minutes: 30);
 
 /// How often idle background tabs are considered for suspension. The sweep
 /// is cheap (a map walk and one native call when candidates exist), so a
@@ -146,9 +138,9 @@ class TabHibernation extends Notifier<Set<String>> {
     return const {};
   }
 
-  /// Suspends the engine sessions of the background tabs idle past
-  /// [_hibernationAfter] and adds the ones native actually suspended to the
-  /// state.
+  /// Suspends the engine sessions of the background tabs idle past the
+  /// configured threshold (see `tabHibernationThresholdProvider`) and adds
+  /// the ones native actually suspended to the state.
   Future<void> _sweep() async {
     // The method channel call is awaited; overlapping sweeps would only
     // re-send ids the guards would drop anyway.
@@ -162,6 +154,15 @@ class TabHibernation extends Notifier<Set<String>> {
 
       final tabIds = ref.read(tabListProvider).value;
       final selected = ref.read(selectedTabProvider);
+
+      // The user-configurable idle threshold (10/30/60 minutes), read per
+      // sweep so a change in settings applies on the next tick - within a
+      // minute. The default while the settings stream is still loading.
+      final hibernationAfter = Duration(
+        minutes:
+            ref.read(tabHibernationThresholdProvider).value ??
+            defaultHibernationThresholdMinutes,
+      );
 
       final now = DateTime.now();
       final candidates = <String>{};
@@ -180,7 +181,7 @@ class TabHibernation extends Notifier<Set<String>> {
         final lastActive = _lastActive[tabId];
         if (lastActive == null) {
           _lastActive[tabId] = now;
-        } else if (now.difference(lastActive) >= _hibernationAfter) {
+        } else if (now.difference(lastActive) >= hibernationAfter) {
           candidates.add(tabId);
         }
       }

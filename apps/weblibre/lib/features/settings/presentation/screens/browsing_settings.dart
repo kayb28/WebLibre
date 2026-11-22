@@ -33,6 +33,7 @@ import 'package:weblibre/features/app_links/presentation/widgets/container_app_l
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/keep_alive/presentation/widgets/tab_hibernation_settings.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
@@ -44,6 +45,10 @@ import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
+
+  // Hibernation strings stay beside their tile until they can move into
+  // the ARB pipeline; see tab_hibernation_settings.dart.
+  final hibernationStrings = tabHibernationL10n(context);
 
   return [
     SettingsSectionDefinition(
@@ -96,6 +101,12 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
             l10n.settings_backgroundTabBehaviorKeywords,
           ),
           child: const _BackgroundTabOpenSection(),
+        ),
+        SettingsEntryDefinition(
+          title: hibernationStrings.title,
+          subtitle: hibernationStrings.subtitle,
+          keywords: settingsKeywords(hibernationStrings.keywords),
+          child: const TabHibernationSettingsTile(),
         ),
         // It suggests which container each tab belongs in, so it sits with
         // the tab settings.
